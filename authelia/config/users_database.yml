@@ -1,0 +1,9 @@
+---
+users:
+  admin:
+    displayname: "Admin"
+    password: "$argon2id$v=19$m=65536,t=3,p=4$REPLACE_WITH_HASH"
+    email: admin@yourdomain.com
+    groups:
+      - admins
+      - dev

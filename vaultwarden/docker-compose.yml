@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:1.32
+    container_name: vaultwarden
+    restart: unless-stopped
+    environment:
+      - DOMAIN=https://${VW_DOMAIN}
+      - ADMIN_TOKEN=${VW_ADMIN_TOKEN}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_FROM=${SMTP_FROM}
+      - SMTP_PORT=587
+      - SMTP_SECURITY=starttls
+      - SMTP_USERNAME=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    volumes:
+      - vaultwarden_data:/data
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.vaultwarden.rule=Host(`${VW_DOMAIN}`)"
+      - "traefik.http.routers.vaultwarden.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vaultwarden.loadbalancer.server.port=80"
+      - "traefik.http.routers.vaultwarden-websocket.rule=Host(`${VW_DOMAIN}`) && Path(`/notifications/hub`)"
+      - "traefik.http.routers.vaultwarden-websocket.entrypoints=websecure"
+      - "traefik.http.routers.vaultwarden-websocket.tls.certresolver=letsencrypt"
+      - "traefik.http.services.vaultwarden-websocket.loadbalancer.server.port=3012"
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  vaultwarden_data:
