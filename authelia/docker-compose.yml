@@ -16,8 +16,15 @@ services:
       - AUTHELIA_NOTIFIER_SMTP_USERNAME=${SMTP_USER}
       - AUTHELIA_NOTIFIER_SMTP_PASSWORD=${SMTP_PASSWORD}
       - AUTHELIA_NOTIFIER_SMTP_SENDER=${SMTP_FROM}
+      - DOMAIN=${DOMAIN}
+      - AUTHELIA_REDIS_PASSWORD=${AUTHELIA_REDIS_PASSWORD}
+      - SMTP_STARTUP_CHECK=${SMTP_STARTUP_CHECK}
+    depends_on:
+      redis:
+        condition: service_healthy
     networks:
       - proxy
+      - authelia_internal
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.authelia.rule=Host(`${AUTHELIA_DOMAIN}`)"
@@ -28,6 +35,25 @@ services:
       - "traefik.http.middlewares.authelia.forwardauth.trustForwardHeader=true"
       - "traefik.http.middlewares.authelia.forwardauth.authResponseHeaders=Remote-User,Remote-Groups,Remote-Name,Remote-Email"
 
+  redis:
+    image: redis:7-alpine
+    container_name: authelia_redis
+    restart: unless-stopped
+    command: redis-server --requirepass ${AUTHELIA_REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    networks:
+      - authelia_internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${AUTHELIA_REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
 networks:
   proxy:
     external: true
+  authelia_internal:
+
+volumes:
+  redis_data:
