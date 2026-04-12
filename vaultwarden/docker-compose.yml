@@ -28,6 +28,11 @@ services:
       - "traefik.http.routers.vaultwarden-websocket.entrypoints=websecure"
       - "traefik.http.routers.vaultwarden-websocket.tls.certresolver=letsencrypt"
       - "traefik.http.services.vaultwarden-websocket.loadbalancer.server.port=3012"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/alive"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
 networks:
   proxy:

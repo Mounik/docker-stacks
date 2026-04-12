@@ -38,6 +38,11 @@ services:
       - "traefik.http.middlewares.nextcloud_redirect.redirectregex.regex=^https://(.*)/.well-known/(card|cal)dav"
       - "traefik.http.middlewares.nextcloud_redirect.redirectregex.replacement=https://$$1/remote.php/dav/"
       - "traefik.http.routers.nextcloud.middlewares=nextcloud_redirect,nextcloud"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/status.php"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   db:
     image: postgres:16-alpine
