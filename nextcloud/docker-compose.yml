@@ -21,9 +21,8 @@ services:
       - PHP_MEMORY_LIMIT=512M
       - PHP_UPLOAD_LIMIT=10G
     volumes:
-      - nextcloud_data:/var/www/html
-      - nextcloud_apps:/var/www/html/custom_apps
-      - nextcloud_config:/var/www/html/config
+      - nextcloud_html:/var/www/html
+      - nextcloud_data:/var/www/html/data
     networks:
       - proxy
       - nextcloud_internal
@@ -83,8 +82,7 @@ networks:
   nextcloud_internal:
 
 volumes:
+  nextcloud_html:
   nextcloud_data:
-  nextcloud_apps:
-  nextcloud_config:
   db_data:
   redis_data:
