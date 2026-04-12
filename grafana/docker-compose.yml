@@ -71,7 +71,11 @@ services:
     image: gcr.io/cadvisor/cadvisor:v0.51
     container_name: cadvisor
     restart: unless-stopped
-    privileged: true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_PTRACE
+    read_only: true
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -79,6 +83,18 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     devices:
       - /dev/kmsg
+    networks:
+      - monitoring
+
+  promtail:
+    image: grafana/promtail:3.3
+    container_name: promtail
+    restart: unless-stopped
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - ./promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
     networks:
       - monitoring
 
