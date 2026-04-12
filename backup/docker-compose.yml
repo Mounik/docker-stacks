@@ -1,4 +1,3 @@
-version: "3.8"
 
 services:
   backup:
@@ -23,6 +22,11 @@ services:
       - grafana_data:/backup/target/grafana:ro
       - uptime_data:/backup/target/uptime-kuma:ro
       - ./backups:/archive
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - backup_internal
 
