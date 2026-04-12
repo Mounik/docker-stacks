@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  backup:
+    image: offen/docker-volume-backup:v2
+    container_name: docker-backup
+    restart: unless-stopped
+    environment:
+      - BACKUP_SOURCES=/backup/target
+      - BACKUP_CRON_EXPRESSION=${BACKUP_CRON:-0 2 * * *}
+      - BACKUP_FILENAME=${BACKUP_PREFIX:-backup}-%Y-%m-%dT%H-%M-%S.tar.gz
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
+      - BACKUP_PRUNING_LEEWAY=5m
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID:-}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY:-}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME:-}
+      - S3_ENDPOINT=${S3_ENDPOINT:-}
+    volumes:
+      - nextcloud_data:/backup/target/nextcloud:ro
+      - gitea_data:/backup/target/gitea:ro
+      - vaultwarden_data:/backup/target/vaultwarden:ro
+      - portainer_data:/backup/target/portainer:ro
+      - grafana_data:/backup/target/grafana:ro
+      - uptime_data:/backup/target/uptime-kuma:ro
+      - ./backups:/archive
+    networks:
+      - backup_internal
+
+networks:
+  backup_internal:
+
+volumes:
+  nextcloud_data:
+    external: true
+    name: docker-stacks_nextcloud_data
+  gitea_data:
+    external: true
+    name: docker-stacks_gitea_data
+  vaultwarden_data:
+    external: true
+    name: docker-stacks_vaultwarden_data
+  portainer_data:
+    external: true
+    name: docker-stacks_portainer_data
+  grafana_data:
+    external: true
+    name: docker-stacks_grafana_data
+  uptime_data:
+    external: true
+    name: docker-stacks_uptime_data
