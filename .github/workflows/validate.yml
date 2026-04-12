@@ -1,0 +1,59 @@
+name: Validate Docker Stacks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        stack:
+          - traefik
+          - authelia
+          - nextcloud
+          - grafana
+          - vaultwarden
+          - portainer
+          - gitea
+          - uptime-kuma
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate ${{ matrix.stack }} docker-compose
+        working-directory: ${{ matrix.stack }}
+        run: |
+          cp .env.example .env
+          sed -i 's/change_me_*/replaceme/g' .env
+          sed -i 's/ChangeMeNow!/Replaceme123!/g' .env
+          docker compose config -q
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check .env.example exists in each stack
+        run: |
+          for dir in */; do
+            if [ -f "${dir}docker-compose.yml" ]; then
+              if [ ! -f "${dir}.env.example" ]; then
+                echo "::error::Missing .env.example in ${dir}"
+                exit 1
+              fi
+            fi
+          done
+
+      - name: Check README.md exists in each stack
+        run: |
+          for dir in */; do
+            if [ -f "${dir}docker-compose.yml" ]; then
+              if [ ! -f "${dir}README.md" ]; then
+                echo "::error::Missing README.md in ${dir}"
+                exit 1
+              fi
+            fi
+          done
