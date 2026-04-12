@@ -1,3 +1,10 @@
 .env
 acme.json
 *.sqlite3
+*.pem
+*.key
+*.crt
+*.sql
+backups/
+*.tar.gz
+secrets/
