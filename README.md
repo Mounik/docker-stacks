@@ -1,4 +1,5 @@
 # Docker Stacks
+![CI](https://github.com/Mounik/docker-stacks/actions/workflows/ci.yml/badge.svg)
 
 **Production-ready Docker Compose stacks** — Reverse proxy, monitoring, self-hosted apps, security. Plug & play.
 
