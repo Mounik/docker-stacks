@@ -23,6 +23,17 @@ jobs:
           - immich
           - paperless
           - jellyfin
+          - dozzle
+          - registry
+          - woodpecker-ci
+          - crowdsec
+          - headscale
+          - adguard
+          - ntfy
+          - netbox
+          - it-tools
+          - beszel
+          - syncthing
     steps:
       - uses: actions/checkout@v4
 

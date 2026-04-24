@@ -1,0 +1,43 @@
+services:
+  ntfy:
+    image: binwiederhier/ntfy:v2.12.2
+    container_name: ntfy
+    restart: unless-stopped
+    command:
+      - serve
+    environment:
+      - NTFY_BASE_URL=https://${NTFY_DOMAIN}
+      - NTFY_AUTH_DEFAULT=deny-all
+      - NTFY_BEHIND_PROXY=true
+      - NTFY_ATTACHMENT_CACHE_DIR=/var/cache/ntfy/attachments
+      - NTFY_KEEPALIVE_INTERVAL=45s
+    volumes:
+      - ntfy_data:/var/lib/ntfy
+      - ntfy_cache:/var/cache/ntfy
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.ntfy.rule=Host(`${NTFY_DOMAIN}`)"
+      - "traefik.http.routers.ntfy.entrypoints=websecure"
+      - "traefik.http.routers.ntfy.tls.certresolver=letsencrypt"
+      - "traefik.http.services.ntfy.loadbalancer.server.port=80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  ntfy_data:
+    name: docker-stacks_ntfy_data
+  ntfy_cache:
+    name: docker-stacks_ntfy_cache

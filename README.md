@@ -21,6 +21,17 @@ Each stack is self-contained with its own README, `.env.example`, and configurat
 | [Paperless-ngx](./paperless/) | Document digitization, OCR & full-text search | 8000 |
 | [Jellyfin](./jellyfin/) | Open-source media server (movies, TV, music) | 8096 |
 | [Backup](./backup/) | Automated volume backups | - |
+| [Dozzle](./dozzle/) | Real-time Docker logs viewer | 8080 |
+| [Registry](./registry/) | Private Docker image registry + UI | 5000 |
+| [Woodpecker CI](./woodpecker-ci/) | Lightweight CI/CD for Gitea | 8000 |
+| [CrowdSec](./crowdsec/) | Collaborative IPS with Traefik bouncer | - |
+| [Headscale](./headscale/) | Self-hosted Tailscale/WireGuard control plane | 8080 |
+| [AdGuard Home](./adguard/) | DNS resolver, ad blocker, DNS-over-HTTPS | 53, 3002 |
+| [ntfy](./ntfy/) | Push notifications for scripts & alerts | 80 |
+| [NetBox](./netbox/) | IPAM & DCIM | 8080 |
+| [IT-Tools](./it-tools/) | Web toolbox (base64, cron, regex, JWT, etc.) | 80 |
+| [Beszel](./beszel/) | Lightweight system monitoring dashboard | 8090 |
+| [Syncthing](./syncthing/) | P2P file synchronization | 8384 |
 
 ## Quick Start
 

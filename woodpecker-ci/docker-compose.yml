@@ -1,0 +1,93 @@
+services:
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:v3.6.2
+    container_name: woodpecker_server
+    restart: unless-stopped
+    environment:
+      - WOODPECKER_OPEN=true
+      - WOODPECKER_HOST=https://${WOODPECKER_DOMAIN}
+      - WOODPECKER_GITEA=true
+      - WOODPECKER_GITEA_URL=${GITEA_URL}
+      - WOODPECKER_GITEA_CLIENT=${GITEA_CLIENT_ID}
+      - WOODPECKER_GITEA_SECRET=${GITEA_CLIENT_SECRET}
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
+      - WOODPECKER_ADMIN=${WOODPECKER_ADMIN}
+      - WOODPECKER_DATABASE_DRIVER=postgres
+      - WOODPECKER_DATABASE_DATASOURCE=postgres://${POSTGRES_USER:-woodpecker}:${POSTGRES_PASSWORD:-ChangeMeNow!}@db:5432/woodpecker?sslmode=disable
+    volumes:
+      - woodpecker_data:/var/lib/woodpecker
+    networks:
+      - proxy
+      - woodpecker_internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.woodpecker.rule=Host(`${WOODPECKER_DOMAIN}`)"
+      - "traefik.http.routers.woodpecker.entrypoints=websecure"
+      - "traefik.http.routers.woodpecker.tls.certresolver=letsencrypt"
+      - "traefik.http.services.woodpecker.loadbalancer.server.port=8000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:v3.6.2
+    container_name: woodpecker_agent
+    restart: unless-stopped
+    environment:
+      - WOODPECKER_SERVER=woodpecker-server:9000
+      - WOODPECKER_AGENT_SECRET=${WOODPECKER_AGENT_SECRET}
+      - WOODPECKER_BACKEND=docker
+      - DOCKER_HOST=tcp://docker-engine:2375
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - woodpecker_internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  db:
+    image: postgres:16-alpine
+    container_name: woodpecker_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-woodpecker}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ChangeMeNow!}
+      - POSTGRES_DB=woodpecker
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - woodpecker_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-woodpecker} -d woodpecker"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+networks:
+  proxy:
+    external: true
+  woodpecker_internal:
+
+volumes:
+  woodpecker_data:
+    name: docker-stacks_woodpecker_data
+  db_data:
+    name: docker-stacks_woodpecker_db_data

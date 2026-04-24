@@ -1,0 +1,34 @@
+services:
+  beszel:
+    image: henrygd/beszel:0.11.0
+    container_name: beszel
+    restart: unless-stopped
+    volumes:
+      - beszel_data:/beszel_data
+    networks:
+      - proxy
+      - beszel_internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.beszel.rule=Host(`${BESZEL_DOMAIN}`)"
+      - "traefik.http.routers.beszel.entrypoints=websecure"
+      - "traefik.http.routers.beszel.tls.certresolver=letsencrypt"
+      - "traefik.http.services.beszel.loadbalancer.server.port=8090"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  proxy:
+    external: true
+  beszel_internal:
+
+volumes:
+  beszel_data:
+    name: docker-stacks_beszel_data

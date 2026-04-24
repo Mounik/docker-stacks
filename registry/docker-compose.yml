@@ -1,0 +1,68 @@
+services:
+  registry:
+    image: registry:2.8.3
+    container_name: docker_registry
+    restart: unless-stopped
+    environment:
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/var/lib/registry
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=Registry Realm
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/htpasswd
+      - REGISTRY_STORAGE_DELETE_ENABLED=true
+    volumes:
+      - registry_data:/var/lib/registry
+      - ${REGISTRY_AUTH_PATH:-./auth}:/auth
+    networks:
+      - proxy
+      - registry_internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry.rule=Host(`${REGISTRY_DOMAIN}`)"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls.certresolver=letsencrypt"
+      - "traefik.http.services.registry.loadbalancer.server.port=5000"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  registry-ui:
+    image: joxit/docker-registry-ui:2.5
+    container_name: registry_ui
+    restart: unless-stopped
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=${REGISTRY_TITLE:-Docker Registry}
+      - REGISTRY_URL=https://${REGISTRY_DOMAIN}
+    networks:
+      - proxy
+      - registry_internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.registry-ui.rule=Host(`${REGISTRY_UI_DOMAIN}`)"
+      - "traefik.http.routers.registry-ui.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui.tls.certresolver=letsencrypt"
+      - "traefik.http.services.registry-ui.loadbalancer.server.port=80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  proxy:
+    external: true
+  registry_internal:
+
+volumes:
+  registry_data:
+    name: docker-stacks_registry_data

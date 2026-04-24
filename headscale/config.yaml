@@ -1,0 +1,48 @@
+server_url: "https://headscale.yourdomain.com"
+listen_addr: "0.0.0.0:8080"
+metrics_listen_addr: "127.0.0.1:9090"
+grpc_listen_addr: "0.0.0.0:50443"
+grpc_allow_insecure: false
+
+dns_config:
+  override_local_dns: true
+  nameservers:
+    - "1.1.1.1"
+    - "8.8.8.8"
+  domains: []
+  magic_dns: true
+  base_domain: "hs.headscale.yourdomain.com"
+
+ip_prefixes:
+  - fd7a:115c:a1e0::/48
+  - 100.64.0.0/10
+
+database:
+  type: sqlite3
+  sqlite:
+    path: /var/lib/headscale/db.sqlite
+
+noise:
+  private_key_path: /var/lib/headscale/noise_private.key
+
+prefix_v4: "100.64.0.0/10"
+prefix_v6: "fd7a:115c:a1e0::/48"
+
+derp:
+  urls:
+    - https://controlplane.tailscale.com/derpmap/default
+  paths: []
+  auto_update_enabled: true
+  update_frequency: 24h
+
+unix_socket: /var/run/headscale.sock
+unix_socket_permission: "0770"
+
+deployment:
+  grpc_allow_insecure: false
+
+disable_check_updates: false
+ephemeral_node_inactivity_timeout: "30m"
+node_key_file: /var/lib/headscale/node.key
+private_key_file: /var/lib/headscale/private.key
+public_key_file: /var/lib/headscale/public.key

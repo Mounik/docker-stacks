@@ -1,0 +1,26 @@
+services:
+  it-tools:
+    image: corentinth/it-tools:2024.10.22-7ca5933
+    container_name: it_tools
+    restart: unless-stopped
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.it-tools.rule=Host(`${ITTOOLS_DOMAIN}`)"
+      - "traefik.http.routers.it-tools.entrypoints=websecure"
+      - "traefik.http.routers.it-tools.tls.certresolver=letsencrypt"
+      - "traefik.http.services.it-tools.loadbalancer.server.port=80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  proxy:
+    external: true

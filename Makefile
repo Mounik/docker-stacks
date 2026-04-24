@@ -1,4 +1,4 @@
-STACKS := traefik authelia nextcloud grafana vaultwarden portainer gitea uptime-kuma immich paperless jellyfin backup
+STACKS := traefik authelia nextcloud grafana vaultwarden portainer gitea uptime-kuma immich paperless jellyfin backup dozzle registry woodpecker-ci crowdsec headscale adguard ntfy netbox it-tools beszel syncthing
 PROXY_NETWORK := proxy
 
 .PHONY: init up down ps logs validate help

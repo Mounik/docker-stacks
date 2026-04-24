@@ -1,0 +1,39 @@
+services:
+  adguard:
+    image: adguard/adguardhome:v0.107.61
+    container_name: adguard
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "3002:3000"
+    volumes:
+      - adguard_config:/opt/adguardhome/conf
+      - adguard_data:/opt/adguardhome/work
+    networks:
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.adguard.rule=Host(`${ADGUARD_DOMAIN}`)"
+      - "traefik.http.routers.adguard.entrypoints=websecure"
+      - "traefik.http.routers.adguard.tls.certresolver=letsencrypt"
+      - "traefik.http.services.adguard.loadbalancer.server.port=80"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+networks:
+  proxy:
+    external: true
+
+volumes:
+  adguard_config:
+    name: docker-stacks_adguard_config
+  adguard_data:
+    name: docker-stacks_adguard_data

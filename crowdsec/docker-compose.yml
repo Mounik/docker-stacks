@@ -1,0 +1,66 @@
+services:
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.6.8
+    container_name: crowdsec
+    restart: unless-stopped
+    environment:
+      - COLLECTIONS=crowdsecurity/traefik crowdsecurity/http-cve crowdsecurity/base-http-scenarios
+      - GID=${GID:-1000}
+      - PARSERS=crowdsecurity/traefik-logs
+    volumes:
+      - crowdsec_data:/var/lib/crowdsec/data
+      - crowdsec_config:/etc/crowdsec
+      - /var/log/traefik:/var/log/traefik:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - crowdsec
+      - proxy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  crowdsec-bouncer:
+    image: fbonalair/traefik-crowdsec-bouncer:0.1
+    container_name: crowdsec_bouncer
+    restart: unless-stopped
+    environment:
+      - CROWDSEC_BOUNCER_API_KEY=${CROWDSEC_API_KEY}
+      - CROWDSEC_AGENT_HOST=crowdsec:8080
+      - GIN_MODE=release
+    networks:
+      - crowdsec
+      - proxy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.crowdsec.plugin.bouncer.enabled=true"
+      - "traefik.http.middlewares.crowdsec.plugin.bouncer.crowdseclapikey=${CROWDSEC_API_KEY}"
+      - "traefik.http.routers.crowdsec-bouncer.rule=Host(`${CROWDSEC_DOMAIN}`)"
+      - "traefik.http.routers.crowdsec-bouncer.entrypoints=websecure"
+      - "traefik.http.routers.crowdsec-bouncer.tls.certresolver=letsencrypt"
+      - "traefik.http.services.crowdsec-bouncer.loadbalancer.server.port=8080"
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+
+networks:
+  crowdsec:
+  proxy:
+    external: true
+
+volumes:
+  crowdsec_data:
+    name: docker-stacks_crowdsec_data
+  crowdsec_config:
+    name: docker-stacks_crowdsec_config
