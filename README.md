@@ -1,6 +1,8 @@
 # Docker Stacks
 ![CI](https://github.com/Mounik/docker-stacks/actions/workflows/validate.yml/badge.svg)
 
+> ⚠️ **Before you deploy anything**, read [PREREQUISITES.md](./PREREQUISITES.md) to check domain, DNS, ports, and system requirements.
+
 **Production-ready Docker Compose stacks** — Reverse proxy, monitoring, self-hosted apps, security. Plug & play.
 
 Each stack is self-contained with its own README, `.env.example`, and configuration files.
