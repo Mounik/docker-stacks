@@ -48,3 +48,4 @@ networks:
 
 volumes:
   vaultwarden_data:
+    name: docker-stacks_vaultwarden_data

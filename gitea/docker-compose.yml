@@ -77,4 +77,6 @@ networks:
 
 volumes:
   gitea_data:
+    name: docker-stacks_gitea_data
   db_data:
+    name: docker-stacks_gitea_db_data

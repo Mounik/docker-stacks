@@ -37,3 +37,4 @@ networks:
 
 volumes:
   portainer_data:
+    name: docker-stacks_portainer_data

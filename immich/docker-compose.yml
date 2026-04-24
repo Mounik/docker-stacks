@@ -1,0 +1,131 @@
+services:
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:v2.7.5
+    container_name: immich_server
+    restart: unless-stopped
+    command: ['start.sh', 'immich']
+    volumes:
+      - immich_uploads:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - DB_HOSTNAME=db
+      - DB_USERNAME=${POSTGRES_USER:-immich}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-ChangeMeNow!}
+      - DB_DATABASE_NAME=${POSTGRES_DB:-immich}
+      - REDIS_HOSTNAME=redis
+    depends_on:
+      - redis
+      - db
+    networks:
+      - proxy
+      - immich_internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.immich.rule=Host(`${IMMICH_DOMAIN}`)"
+      - "traefik.http.routers.immich.entrypoints=websecure"
+      - "traefik.http.routers.immich.tls.certresolver=letsencrypt"
+      - "traefik.http.services.immich.loadbalancer.server.port=2283"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2283/api/server-info/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:v2.7.5
+    container_name: immich_ml
+    restart: unless-stopped
+    command: ['start.sh', 'microservices']
+    volumes:
+      - immich_model_cache:/cache
+    environment:
+      - DB_HOSTNAME=db
+      - DB_USERNAME=${POSTGRES_USER:-immich}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-ChangeMeNow!}
+      - DB_DATABASE_NAME=${POSTGRES_DB:-immich}
+      - REDIS_HOSTNAME=redis
+    depends_on:
+      - redis
+      - db
+    networks:
+      - immich_internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  redis:
+    image: redis:7-alpine
+    container_name: immich_redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - immich_internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: tensorchord/pgvecto-rs:pg14-v0.2.0
+    container_name: immich_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-immich}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-ChangeMeNow!}
+      - POSTGRES_DB=${POSTGRES_DB:-immich}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - /dev/shm:/dev/shm
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - immich_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-immich} -d ${POSTGRES_DB:-immich}"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+networks:
+  proxy:
+    external: true
+  immich_internal:
+
+volumes:
+  immich_uploads:
+    name: docker-stacks_immich_uploads
+  immich_model_cache:
+    name: docker-stacks_immich_model_cache
+  db_data:
+    name: docker-stacks_immich_db_data
+  redis_data:
+    name: docker-stacks_immich_redis_data

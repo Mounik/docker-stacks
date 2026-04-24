@@ -20,6 +20,9 @@ jobs:
           - portainer
           - gitea
           - uptime-kuma
+          - immich
+          - paperless
+          - jellyfin
     steps:
       - uses: actions/checkout@v4
 

@@ -101,6 +101,10 @@ networks:
 
 volumes:
   nextcloud_html:
+    name: docker-stacks_nextcloud_html
   nextcloud_data:
+    name: docker-stacks_nextcloud_data
   db_data:
+    name: docker-stacks_nextcloud_db_data
   redis_data:
+    name: docker-stacks_nextcloud_redis_data

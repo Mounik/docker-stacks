@@ -173,5 +173,8 @@ networks:
 
 volumes:
   grafana_data:
+    name: docker-stacks_grafana_data
   prometheus_data:
+    name: docker-stacks_prometheus_data
   loki_data:
+    name: docker-stacks_loki_data

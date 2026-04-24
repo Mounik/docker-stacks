@@ -1,5 +1,5 @@
 # Docker Stacks
-![CI](https://github.com/Mounik/docker-stacks/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Mounik/docker-stacks/actions/workflows/validate.yml/badge.svg)
 
 **Production-ready Docker Compose stacks** — Reverse proxy, monitoring, self-hosted apps, security. Plug & play.
 
@@ -17,6 +17,9 @@ Each stack is self-contained with its own README, `.env.example`, and configurat
 | [Portainer](./portainer/) | Docker management UI | 9443 |
 | [Gitea](./gitea/) | Self-hosted lightweight Git | 3000, 2222 |
 | [Uptime Kuma](./uptime-kuma/) | Uptime monitoring & status page | 3001 |
+| [Immich](./immich/) | Self-hosted photo & video backup (Google Photos alt) | 2283 |
+| [Paperless-ngx](./paperless/) | Document digitization, OCR & full-text search | 8000 |
+| [Jellyfin](./jellyfin/) | Open-source media server (movies, TV, music) | 8096 |
 | [Backup](./backup/) | Automated volume backups | - |
 
 ## Quick Start
